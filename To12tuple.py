@@ -53,13 +53,20 @@ class Transformer(object):
 		# create ID
 		assert(len(eles) == self.length)
 		if not 'ID' in self.keys:
-			name_index = self.keys.index('name')
-			url_index = self.keys.index(self.default_datasource)
-			ID = md5.new(eles[name_index] + eles[url_index]).hexdigest()
-			sources = [ eles[self.keys.index(source)] for source in self.sources]
+			str4md5 = ''
+			if 'name' in self.keys:
+				name_index = self.keys.index('name')
+				str4md5 += eles[name_index]
+			if 'url' in self.keys:
+				url_index = self.keys.index(self.default_datasource)
+				str4md5 += eles[url_index]
+			ID = md5.new(str4md5).hexdigest()
+		else:
+			ID_index = self.keys.index('ID')
+			ID = eles[ID_index]
+		sources = [ eles[self.keys.index(source)] for source in self.sources]
 		for ele,key,data_type,source in zip(eles,self.keys,self.data_types,sources):
-			if not key: continue
-			if not ele: continue
+			if not key or not ele or data_type == 'del' or key == 'ID': continue
 			if data_type == 'refer': 
 				refer = self.refer[self.type].get(ele,None)
 				if not refer:
@@ -70,23 +77,22 @@ class Transformer(object):
 			for sub in ele.split('|'):
 				print '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t\t'.format(ID, self.type, key,
 					sub, 'raw', source, 'STRUCT', data_type, 'zh-cn', time.time())
-				if key = 'name': key = 'alias'
+				if key == 'name': key = 'alias'
 
 
 def main():
-	attrs =	['description_src:url','name','heat:num','description','image:url','pic_6n_121<image:url','alias']
+	#attrs =	['description_src:url','name','heat:num','description','image:url','pic_6n_121<image:url','alias','baike_alias','com_alias'] #food
+	#attrs = ['name','heat:num','link_txt','query_txt','description','description_src:url','image:url','pic_4n_78<image:url','pic_6n_121<image:url','ref_pic_4n_78<image:url','ref_pic_6n_121<image:url'] 
+	#attrs = ['ID','name','description_src','subtype']
+	attrs = ['ID','show_txt','description_src:del']
 	transformer = Transformer(attrs)
-	transformer.set_type('Food')
+	transformer.set_type('ReferObj')
 	transformer.set_datasource('description_src')
 	for line in sys.stdin:
 		transformer.process(line.rstrip('\n').split('\t'))
 
 
 
-print >>sys.stderr, 'here'
-main()
-if '__name__' == '__main__':
-	print >>sys.stderr,'here'
+if __name__ == '__main__':
 	main()
-
 
