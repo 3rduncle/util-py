@@ -57,7 +57,7 @@ class Transformer(object):
 			if 'name' in self.keys:
 				name_index = self.keys.index('name')
 				str4md5 += eles[name_index]
-			if 'url' in self.keys:
+			if self.default_datasource in self.keys:
 				url_index = self.keys.index(self.default_datasource)
 				str4md5 += eles[url_index]
 			ID = md5.new(str4md5).hexdigest()
@@ -72,7 +72,10 @@ class Transformer(object):
 				if not refer:
 					print >>sys.stderr, 'type:%s, name: %s not found' % (self.type, ele)
 				else:
-					ele = json.dumps(refer,ensure_ascii=False).encode('utf-8')
+		  			ele = json.dumps(refer,ensure_ascii=False).encode('utf-8')
+			elif data_type.startswith('!'):
+				data_type = data_type[1:]
+				ele = ''
 
 			for sub in ele.split('|'):
 				print '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t\t'.format(ID, self.type, key,
@@ -81,13 +84,14 @@ class Transformer(object):
 
 
 def main():
-	#attrs =	['description_src:url','name','heat:num','description','image:url','pic_6n_121<image:url','alias','baike_alias','com_alias'] #food
-	#attrs = ['name','heat:num','link_txt','query_txt','description','description_src:url','image:url','pic_4n_78<image:url','pic_6n_121<image:url','ref_pic_4n_78<image:url','ref_pic_6n_121<image:url'] 
+	attrs =	['description_src:url','name','heat:num','description','image:url','pic_6n_121<image:url','alias','baike_alias','com_alias'] #food
+	#attrs = ['name', 'subtype', 'heat:num','link_txt','query_txt','description_src:url','description','image:url','pic_6n_121<image:url','ref_pic_6n_121<image:url'] 
 	#attrs = ['ID','name','description_src','subtype']
-	attrs = ['ID','show_txt','description_src:del']
+	#attrs = ['ID','show_txt','description_src:del']
+	attrs = ['ID','image:del','pic_6n_121<image:url']
 	transformer = Transformer(attrs)
-	transformer.set_type('ReferObj')
-	transformer.set_datasource('description_src')
+	transformer.set_type('Sport')
+	transformer.set_datasource('image')
 	for line in sys.stdin:
 		transformer.process(line.rstrip('\n').split('\t'))
 
